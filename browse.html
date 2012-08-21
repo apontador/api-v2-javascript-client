@@ -1,0 +1,54 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Client Authentication Example</title>
+<link type="text/css" rel="stylesheet" href="style.css" />
+<script type="text/javascript"
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script>
+	function authenticate() {
+		var appID = 'my-trusted-client-with-secret';
+		var path = 'http://localhost:8080/api/oauth/authorize?';
+		var queryParams = [ 'client_id=' + appID,
+				'redirect_uri=/api/browse.html', 'scope=read',
+				'response_type=token' ];
+		var query = queryParams.join('&');
+		var url = path + query;
+		window.location.href = url;
+	}
+	function display() {
+		var hash = window.location.hash;
+		var accessToken = hash.split('&')[0].split("=")[1];
+		console.log('access-token:' + accessToken);
+		var headers = {
+			'Authorization' : 'Bearer ' + accessToken,
+			'Accept' : 'application/json'
+		};
+		$.ajaxSetup({
+			'headers' : headers,
+			dataType : 'text'
+		});
+		$.get('http://localhost:8080/api/places/nottinghill', function(data) {
+			console.log('data:' + data);
+			$('#message').text(data);
+		});
+	}
+	$(function() {
+		if (window.location.hash.length == 0) {
+			authenticate();
+		} else {
+			display();
+		}
+	})
+</script>
+</head>
+<body>
+	<h1>Apontador API: Exemplo de chamada JavaScript</h1>
+
+	<div id="content">
+		<p><br>Uma vez autenticado e com o acesso aprovado, o código 
+			JavaScript desta página deve imprimir abaixo um recurso protegido da API Apontador</p>
+		<p id="message" />
+	</div>
+</body>
+</html>
